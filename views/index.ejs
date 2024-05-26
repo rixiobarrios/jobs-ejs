@@ -1,0 +1,11 @@
+<!-- The index.ejs view just shows links to login or register. The logon.ejs view collects the email and password from the user. The register collects the name, email, and password for a new user. We want to use the partials as well. We want to modify the header partial to give the name of the logged on user, and to add a logoff button if a user is logged on.-->
+
+<%- include("partials/head.ejs") %>
+<%- include("partials/header.ejs") %>
+<% if (user) { %>
+    <a href="/secretWord">Click this link to view/change the secret word.</a>
+<% } else { %>
+    <a href="/sessions/logon">Click this link to logon.</a>
+    <a href="/sessions/register">Click this link to register.</a>
+<% } %>
+<%- include("partials/footer.ejs") %>
