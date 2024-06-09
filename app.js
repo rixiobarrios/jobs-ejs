@@ -4,9 +4,9 @@ require('express-async-errors');
 
 const app = express();
 
-// Middleware
-app.set('view engine', 'ejs');
-app.use(require('body-parser').urlencoded({ extended: true }));
+// // Middleware
+// app.set('view engine', 'ejs');
+// app.use(require('body-parser').urlencoded({ extended: true }));
 
 const session = require('express-session');
 // app.use(
@@ -48,6 +48,45 @@ app.use(session(sessionParams));
 const passport = require('passport');
 const passportInit = require('./passport/passportInit');
 
+// // Middleware
+app.set('view engine', 'ejs');
+app.use(require('body-parser').urlencoded({ extended: true }));
+
+const cookieParser = require('cookie-parser');
+const csrf = require('host-csrf');
+
+// You can use process.env.SESSION_SECRET as your cookie-parser secret.
+app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(express.urlencoded({ extended: false }));
+let csrf_development_mode = true;
+if (app.get('env') === 'production') {
+    csrf_development_mode = false;
+    app.set('trust proxy', 1);
+}
+const csrf_options = {
+    protected_operations: ['PATCH'],
+    protected_content_types: ['application/json'],
+    development_mode: csrf_development_mode,
+};
+// const csrf_middleware = csrf(csrf_options); //initialize and return
+
+//  Note that the app.use for the CSRF middleware must come after the cookie parser middleware and after the body parser middleware, but before any of the routes.
+app.use(csrf(csrf_options));
+
+// There is one more step. You need to make your application more secure! You should configure the helmet, xss-clean, and express-rate-limit packages, just as you did for Lesson 10. Then try the application out one more time. CORS is not needed in this case.
+const helmet = require('helmet');
+const xss = require('xss-clean');
+const rateLimiter = require('express-rate-limit');
+
+app.use(helmet());
+app.use(xss());
+app.use(
+    rateLimiter({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 100, // limit each IP to 100 requests per windowMs
+    })
+);
+
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
@@ -69,7 +108,7 @@ app.use('/sessions', require('./routes/sessionRoutes'));
 // let secretWord = 'syzygy';
 // app.get('/secretWord', (req, res) => {
 //     res.render('secretWord', { secretWord });
-// });
+// })
 // app.post('/secretWord', (req, res) => {
 //     secretWord = req.body.secretWord;
 //     res.redirect('/secretWord');
@@ -77,8 +116,14 @@ app.use('/sessions', require('./routes/sessionRoutes'));
 
 // Next let’s replace the app.get and app.post statements for the "/secretWord" routes in app.js with these lines:
 
+// new secret word handling
+// const secretWordRouter = require('./routes/secretWord');
+// app.use('/secretWord', secretWordRouter);
+
+// latest secret word handling
 const secretWordRouter = require('./routes/secretWord');
-app.use('/secretWord', secretWordRouter);
+const auth = require('./middleware/auth');
+app.use('/secretWord', auth, secretWordRouter);
 
 // let secretWord = "syzygy"; <-- comment this out or remove this line
 // app.get('/secretWord', (req, res) => {
@@ -112,6 +157,13 @@ app.use('/secretWord', secretWordRouter);
 //     }
 //     res.redirect('/secretWord');
 // });
+
+// In app.js, require the jobs router, and add an app.use statement for it, at an appropriate place in the code. The app.use statement might look like:
+
+// jobs router
+const jobsRouter = require('./routes/jobs');
+// You need to include the auth middleware in the app.use, because these are protected routes and the requester must be a logged on user.
+app.use('/jobs', auth, jobsRouter);
 
 // Error handling
 app.use((req, res) => {

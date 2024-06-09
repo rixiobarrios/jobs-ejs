@@ -22,9 +22,18 @@ const registerDo = async (req, res, next) => {
         } else {
             return next(e);
         }
-        return res.render('register', { errors: flash('errors') });
+        // return res.render('register', { errors: flash('errors') });
+        validation_errors = true;
     }
-    res.redirect('/');
+    // res.redirect('/');
+    // if there are no validation errors then redirect to main paige
+    // else pass errors to be rendered in the register view
+
+    if (!validation_errors) {
+        res.redirect('/');
+    } else {
+        return res.render('register', { errors: req.flash('error') });
+    }
 };
 
 const logoff = (req, res) => {
