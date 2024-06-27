@@ -158,6 +158,32 @@ app.use('/secretWord', auth, secretWordRouter);
 //     res.redirect('/secretWord');
 // });
 
+// Function Testing for Rendered HTML
+// Of course, the application you are writing is not intended to provide an API.  Instead it provides rendered HTML pages.  You can test these as well.
+
+// There are two annoying problems to deal with, one in Chai and one in the Express rendering engine.  In Express, when a page is rendered, it should set the Content-Type response header to be text/html.  But it doesn't.  The second problem is that if Chai receives a response without the Content-Type header, it tries to parse it as JSON, and throws an error if that fails. It should catch the error and call the callback, but it doesn't, which is crude.  You can fix the issue by setting the Content-Type header appropriately, with this middleware, which should be added before your routes:
+
+app.use((req, res, next) => {
+    if (req.path == '/multiply') {
+        res.set('Content-Type', 'application/json');
+    } else {
+        res.set('Content-Type', 'text/html');
+    }
+    next();
+});
+
+// Your current application doesn't have an API, so you can add one by adding the following to app.js:
+
+app.get('/multiply', (req, res) => {
+    const result = req.query.first * req.query.second;
+    if (result.isNaN) {
+        result = 'NaN';
+    } else if (result == null) {
+        result = 'null';
+    }
+    res.json({ result: result });
+});
+
 // In app.js, require the jobs router, and add an app.use statement for it, at an appropriate place in the code. The app.use statement might look like:
 
 // jobs router
@@ -175,13 +201,36 @@ app.use((err, req, res, next) => {
     console.log(err);
 });
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
 
-const start = async () => {
+// const start = async () => {
+//     try {
+// Then add this line to app.js, just before the listen line:
+// Edit your app.js.  You'll have a line that reads something like:
+// await require('./db/connect')(process.env.MONGO_URI);
+// You should change it to look something like the following:
+//         let mongoURL = process.env.MONGO_URI;
+//         if (process.env.NODE_ENV == 'test') {
+//             mongoURL = process.env.MONGO_URI_TEST;
+//         }
+//         await require('./db/connect')(mongoURL);
+//         app.listen(port, () =>
+//             console.log(`Server is listening on port ${port}...`)
+//         );
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
+
+// start();
+
+// You also have to change app.js to make your app available to the test.  The bottom of the file should look like:
+
+const port = process.env.PORT || 3000;
+const start = () => {
     try {
-        // Then add this line to app.js, just before the listen line:
-        await require('./db/connect')(process.env.MONGO_URI);
-        app.listen(port, () =>
+        require('./db/connect')(url);
+        return app.listen(port, () =>
             console.log(`Server is listening on port ${port}...`)
         );
     } catch (error) {
@@ -189,4 +238,6 @@ const start = async () => {
     }
 };
 
-start();
+const server = start();
+
+module.exports = { app, server };

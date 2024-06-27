@@ -8,6 +8,7 @@
     "assert-plus": "^0.1.5",
     "async": "^0.9.2",
     "aws-sign": "^0.3.0",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "boom": "^0.4.2",
     "colors": "^0.6.2",
@@ -64,8 +65,8 @@
     "xtend": "^2.0.6"
   },
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":"node app.js",
+    "test": "NODE_ENV=test mocha tests/*.mjs --exit"
   },
   "repository": {
     "type": "git",
@@ -76,5 +77,13 @@
   "bugs": {
     "url": "https://github.com/rixiobarrios/jobs-ejs/issues"
   },
-  "homepage": "https://github.com/rixiobarrios/jobs-ejs#readme"
+  "homepage": "https://github.com/rixiobarrios/jobs-ejs#readme",
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "chai": "^5.1.1",
+    "chai-http": "^4.4.0",
+    "factory-bot": "^6.3.1",
+    "mocha": "^10.4.0",
+    "puppeteer": "^22.10.0"
+  }
 }

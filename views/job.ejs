@@ -11,6 +11,7 @@
   <label for="position">Position:</label>
   <input type="text" name="position" id="position" value="<%= job ? job.position : '' %>" required>
 
+  
   <label for="status">Status:</label>
   <select name="status" id="status">
     <option value="pending" <%= job && job.status === 'pending' ? 'selected' : '' %>>pending</option>

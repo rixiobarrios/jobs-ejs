@@ -1,7 +1,7 @@
 //  We need to create a corresponding file controllers/sessionController.js. Here we use the User model. However, the file you copied makes some references to the JWT library.
 
 const User = require('../models/User');
-const parseVErr = require('../util/parseValidationErrors');
+const parseVErr = require('../utils/parseValidationErrors');
 
 const registerShow = (req, res) => {
     res.render('register');
